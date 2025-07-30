@@ -13,10 +13,15 @@ def main():
     elif page == "악성 웹사이트 뉴스":
         st.title("악성 웹사이트 관련 최신 뉴스")
         st.write("실시간으로 악성 웹사이트 관련 뉴스를 크롤링하여 제공합니다.")
+        search_query = st.text_input("뉴스 제목 검색", "")
         with st.spinner('뉴스를 불러오는 중입니다...'):
             news = crawl_malicious_news()
         if news:
-            for n in news:
+            # 검색어가 있으면 필터링
+            filtered_news = [n for n in news if search_query.strip() == "" or search_query.lower() in n['title'].lower()]
+            if not filtered_news:
+                st.info("검색어를 포함하는 뉴스가 없습니다.")
+            for n in filtered_news:
                 with st.container():
                     cols = st.columns([1, 4])
                     with cols[0]:
