@@ -7,21 +7,12 @@ def crawl_malicious_news():
     각 뉴스의 detail 페이지에서 제목/이미지/본문을 추출합니다.
     """
     base_url = "https://m.boannews.com/html/"
-    url = base_url + "Main_Menu.html"
-    params = {"page1": 1}
     news_list = []
+    start_idx = 138466
+    count = 30
 
-    response = requests.get(url, params=params)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    for li in soup.select('ul.tab-newslist li'):
-        a_tag = li.find('a', href=True)
-        if not a_tag:
-            continue
-        href = a_tag['href']
-        if not href.startswith('http'):
-            detail_url = base_url + href
-        else:
-            detail_url = href
+    for idx in range(start_idx, start_idx - count, -1):
+        detail_url = f"{base_url}detail.html?mtype=6&tab_type=&idx={idx}"
         try:
             detail_resp = requests.get(detail_url)
             detail_soup = BeautifulSoup(detail_resp.text, 'html.parser')
