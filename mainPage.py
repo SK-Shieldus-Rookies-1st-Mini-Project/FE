@@ -31,12 +31,21 @@ def main():
                             try:
                                 detail = requests.get(n['link'])
                                 detail_soup = BeautifulSoup(detail.text, 'html.parser')
-                                # 모바일 보안뉴스 본문 추출 (예시: .news_txt, 실제 구조에 따라 조정 필요)
-                                content = detail_soup.select_one('.news_txt')
+                                # 1순위: 모바일/PC 공통 본문 .con #con
+                                content = detail_soup.select_one('.con #con')
+                                
                                 if content:
-                                    st.write(content.get_text(strip=True))
+                                    # 이미지, <br>, <b> 등 포함한 본문 HTML을 그대로 예쁘게 출력
+                                    # 글자 크기 줄임
+                                    html = str(content)
+                                    st.markdown(f"<div style='margin-bottom:10px; line-height:1.7; font-size:10px !important;'>{html}</div>", unsafe_allow_html=True)
                                 else:
-                                    st.write('본문을 불러올 수 없습니다.')
+                                    # 본문이 없으면 og:description 메타 태그에서 요약 추출
+                                    og_desc = detail_soup.find('meta', attrs={'property': 'og:description'})
+                                    if og_desc and og_desc.get('content'):
+                                        st.markdown(f"<div style='margin-bottom:10px; line-height:1.7; font-size:10px !important;'>{og_desc['content']}</div>", unsafe_allow_html=True)
+                                    else:
+                                        st.write('본문을 불러올 수 없습니다.')
                             except Exception as e:
                                 st.write('본문을 불러올 수 없습니다.')
         else:
