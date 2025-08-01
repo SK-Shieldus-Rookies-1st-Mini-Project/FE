@@ -1,3 +1,4 @@
+from unittest import result
 import streamlit as st
 import pymysql
 import pandas as pd
@@ -7,6 +8,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import seaborn as sns
+import parsing_html
+from parsing_html import getHtml, to_csv, get_csv
+import predict_module
+from predict_module import predict_from_csv
+
 
 # 한글폰트 path 설정
 font_path = 'C:\\windows\\Fonts\\malgun.ttf'
@@ -67,14 +73,18 @@ def main():
         with center:
             user_url = st.text_input("🔎 악성 여부를 확인할 URL을 입력하세요", "")
             if user_url:
-                result = get_url_result(user_url)
+
+                parsing_html.get_csv(user_url)
+                result, prob = predict_module.predict_from_csv(csv_path='extract_feature.csv')
 
                 if result is None:
                     st.warning("🤔 이 URL은 아직 분석되지 않았습니다.")
+                    print("예측 결과:", result)
                 elif result == 1:
-                    st.success(f"✅ {user_url} 사이트는 **정상 사이트입니다.**")
+                    st.success(f"✅ {user_url} 사이트는 **정상 사이트입니다.**\n확률: {prob:.2f}%")
+                    
                 elif result == -1:
-                    st.error(f"🚨 {user_url} 사이트는 **악성 사이트입니다.**")
+                    st.error(f"🚨 {user_url} 사이트는 **악성 사이트입니다.**\n확률: {prob:.2f}%")
                 else:
                     st.info(f"⚠️ 분류되지 않은 결과값: {result}")
 
